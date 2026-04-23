@@ -1,61 +1,61 @@
-# 🏨 Hadja Hotel — Sistema Interno de Gestão
+# 🏨 Hadja Hotel — Internal Management System
 
-Aplicativo Android desenvolvido em Kotlin com Jetpack Compose para uso interno de funcionários de hotel
-O sistema permite gerenciar reservas, hóspedes, eventos, manutenção de ar-condicionado, abastecimento do veículo e relatórios operacionais
-
----
-
-## Telas
-
-| Login | Home | Reservas |
-|---|---|---|
-| Autenticação com bloqueio após 3 tentativas | Menu principal com acesso aos 6 módulos | Formulário em stepper com grade visual de quartos |
-
-| Hóspedes | Detalhes do Hóspede | Eventos |
-|---|---|---|
-| Lista com busca por prefixo e cadastro via bottom sheet | Perfil com histórico de reservas | Pipeline completo com cálculo de garçons e buffet |
-
-| Ar-Condicionado | Abastecimento | Relatórios |
-|---|---|---|
-| Comparativo automático de orçamentos | Análise de custo-benefício entre postos | Métricas consolidadas da sessão |
+An Android application built with Kotlin and Jetpack Compose for hotel staff use.
+The system covers room reservations, guest management, event booking, AC maintenance quotes, vehicle fueling analysis, and operational reports.
 
 ---
 
-## Arquitetura
+## Screens
 
-O projeto adota uma arquitetura modular em três camadas, com separação clara de responsabilidades
+| Login | Home | Reservations |
+|---|---|---|
+| Authentication with lockout after 3 attempts | Main menu with access to all 6 modules | Stepper form with visual room grid |
+
+| Guests | Guest Details | Events |
+|---|---|---|
+| List with prefix search and registration via bottom sheet | Profile with reservation history | Full pipeline with waiters and buffet calculation |
+
+| Air Conditioning | Fueling | Reports |
+|---|---|---|
+| Automatic quote comparison | Cost-benefit analysis between stations | Consolidated session metrics |
+
+---
+
+## Architecture
+
+The project follows a modular three-layer architecture with clear separation of concerns.
 
 ```
 ┌─────────────────────────────────────────┐
 │              UI (Screens)               │
-│   Jetpack Compose · sem lógica          │
+│   Jetpack Compose · no business logic   │
 ├─────────────────────────────────────────┤
 │            ViewModel                    │
-│   Estado reativo · ponte UI ↔ Service  │
+│   Reactive state · bridges UI ↔ Service │
 ├─────────────────────────────────────────┤
 │            Services                     │
-│   Kotlin puro · sem Android · testável  │
+│   Pure Kotlin · no Android · testable   │
 ├─────────────────────────────────────────┤
 │             Model                       │
-│   Data classes · Enums · Estado         │
+│   Data classes · Enums · State          │
 └─────────────────────────────────────────┘
 ```
 
-### Por que essa separação?
+### Why this separation?
 
-Os `Services` são Kotlin puro, sem nenhuma dependência do Android
-Isso significa que toda a lógica de negócio pode ser desenvolvida, entendida e testada de forma completamente independente da interface
-O `HotelViewModel` age como ponte, mantendo o estado vivo entre recomposições e expondo os dados via `mutableStateOf` para que o Compose reaja automaticamente a qualquer mudança
+The `Services` are pure Kotlin, with no Android dependencies.
+This means all business logic can be developed, understood and tested completely independently from the interface.
+The `HotelViewModel` acts as the bridge, keeping state alive across recompositions and exposing data via `mutableStateOf` so Compose reacts automatically to any change.
 
 ---
 
-## Estrutura de Arquivos
+## Project Structure
 
 ```
 app/src/main/java/com/hadjahotel/
 │
 ├── model/
-│   ├── HotelState.kt          
+│   ├── HotelState.kt
 │   ├── Reservation.kt
 │   ├── Guest.kt
 │   ├── Event.kt
@@ -63,8 +63,8 @@ app/src/main/java/com/hadjahotel/
 │   ├── FuelResult.kt
 │   ├── BuffetResult.kt
 │   ├── ReportData.kt
-│   ├── RoomType.kt            
-│   └── OperationResult.kt     
+│   ├── RoomType.kt
+│   └── OperationResult.kt
 │
 ├── service/
 │   ├── AuthService.kt
@@ -98,68 +98,68 @@ app/src/main/java/com/hadjahotel/
 │   └── NavGraph.kt
 │
 └── util/
-    ├── Formatter.kt           
-    └── Validator.kt           
+    ├── Formatter.kt
+    └── Validator.kt
 ```
 
 ---
 
-## Módulos do Sistema
+## Modules
 
-### 🛏 Reservas de Quartos
-Gerencia as 20 acomodações do hotel. 
-O atendente informa os dados da estadia e o sistema calcula o valor final com base no tipo de quarto (Standard, Executivo ou Luxo) e aplica a taxa de serviço de 10%. Um grid visual 4×5 exibe o status de cada quarto em tempo real.
+### 🛏 Room Reservations
+Manages the hotel's 20 rooms.
+Staff enters stay details and the system calculates the final amount based on room type (Standard, Executive or Luxury) with an automatic 10% service fee. A 4×5 visual grid displays each room's real-time availability.
 
 ```
-subtotal = diária × noites × fator do tipo
-taxa     = subtotal × 10%
-total    = subtotal + taxa
+subtotal = daily_rate × nights × room_type_factor
+fee      = subtotal × 10%
+total    = subtotal + fee
 ```
 
-### 👥 Cadastro de Hóspedes
-Agenda interna com capacidade para 15 hóspedes ativos. Suporta busca por prefixo, cadastro, edição e remoção. Ao confirmar uma reserva, o hóspede é registrado automaticamente.
-A tela de detalhes exibe o perfil completo com o histórico de reservas.
+### 👥 Guest Management
+Internal directory with a capacity of 15 active guests. Supports prefix search, registration, editing and removal. When a reservation is confirmed, the guest is automatically registered.
+The detail screen shows the full profile with reservation history.
 
-### 🎪 Eventos
-Pipeline completo para reserva do auditório. O sistema escolhe automaticamente entre Auditório Laranja (até 220 pessoas) e Colorado (até 350), verifica disponibilidade por janela horária, e calcula garçons necessários e custo do buffet (café, água e salgados).
+### 🎪 Events
+Full pipeline for auditorium booking. The system automatically selects between Laranja Auditorium (up to 220 guests) and Colorado (up to 350), checks availability by time window, and calculates required waiters and buffet costs (coffee, water and snacks).
 
-### ❄️ Ar-Condicionado
-Comparativo de orçamentos para manutenção. Suporta múltiplas empresas com regras de desconto por volume e custo de deslocamento. 
-O comparativo aparece automaticamente ao cadastrar 2 ou mais orçamentos, destacando o mais barato.
+### ❄️ Air Conditioning
+Quote comparison tool for maintenance services. Supports multiple companies with volume-based discount rules and travel fees.
+The comparison panel appears automatically once 2 or more quotes are added, highlighting the cheapest option.
 
-### ⛽ Abastecimento
-Análise de custo-benefício entre os postos parceiros Wayne Oil e Stark Petrol.
-O sistema aplica a regra dos 70% para determinar se o etanol é vantajoso e calcula o custo de abastecimento completo (42 litros) em cada cenário.
+### ⛽ Fueling
+Cost-benefit analysis between two partner gas stations (Wayne Oil and Stark Petrol).
+The system applies the 70% rule to determine whether ethanol is cost-effective and calculates the total fueling cost (42 liters) for each scenario.
 
-### 📊 Relatórios Operacionais
-Consolida em tempo real os dados da sessão: reservas confirmadas, taxa de ocupação, hóspedes cadastrados, eventos realizados e receita acumulada separada por hospedagem e eventos.
+### 📊 Operational Reports
+Consolidates real-time session data: confirmed reservations, occupancy rate, registered guests, confirmed events, and accumulated revenue broken down by hospitality and events.
 
 ---
 
-## Stack
+## Tech Stack
 
-| Tecnologia | Uso |
+| Technology | Usage |
 |---|---|
-| Kotlin | Linguagem principal |
-| Jetpack Compose | Interface declarativa |
+| Kotlin | Primary language |
+| Jetpack Compose | Declarative UI |
 | Material Design 3 | Design system |
-| ViewModel | Gerenciamento de estado |
-| Navigation Compose | Navegação entre telas |
+| ViewModel | State management |
+| Navigation Compose | Screen navigation |
 
 ---
 
-## Identidade Visual
+## Design
 
-A paleta foi pensada para transmitir sofisticação com personalidade:
+The color palette was chosen to convey sophistication with personality:
 
-- **Verde `#1D9E75`** — cor primária, botões, confirmações e elementos ativos
-- **Dourado `#BA7517`** — cor de acento, detalhes decorativos e destaques
-- **Off-white `#FAFAF9`** — fundo das telas, leveza e limpeza visual
+- **Green `#1D9E75`** — primary color, buttons, confirmations and active elements
+- **Gold `#BA7517`** — accent color, decorative details and highlights
+- **Off-white `#FAFAF9`** — screen background, clean and lightweight
 
 ---
 
-## Sobre o Projeto
+## About
 
-Desenvolvido como projeto acadêmico com foco em arquitetura de software modular. 
-A lógica de negócio foi construída primeiro em Kotlin puro, completamente desacoplada do Android, e depois integrada à interface mobile. 
-Essa abordagem garante que os `Services` sejam coesos, testáveis e independentes de qualquer framework.
+Built as an academic project with a focus on modular software architecture.
+Business logic was written first as pure Kotlin, completely decoupled from Android, then integrated into the mobile interface.
+This approach ensures each service is cohesive, testable, and framework-independent.
